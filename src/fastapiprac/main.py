@@ -1,4 +1,3 @@
-
 import json
 import uvicorn
 from pathlib import Path
@@ -12,15 +11,12 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Путь к файлу с данными
 DATA_FILE = Path(__file__).parent / "data.json"
 
-# Загружаем данные из JSON
-with open(DATA_FILE, "r", encoding="utf-8") as f:
+with open(DATA_FILE, encoding="utf-8") as f:
     data = json.load(f)
 
 
-# Модель книги
 class Book(BaseModel):
     id: int
     title: str
@@ -31,19 +27,16 @@ class Book(BaseModel):
     in_stock: bool
 
 
-# Сохраняем данные в JSON
 def save_data():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-# Получение всех книг
 @app.get("/books", response_model=list[Book])
 async def get_books():
     return data["books"]
 
 
-# Получение книги по ID
 @app.get("/books/{book_id}", response_model=Book)
 async def get_book(book_id: int):
     for book in data["books"]:
@@ -53,7 +46,6 @@ async def get_book(book_id: int):
     raise HTTPException(status_code=404, detail="Книга не найдена")
 
 
-# Добавление новой книги
 @app.post("/books", response_model=Book)
 async def add_book(book: Book):
     for existing_book in data["books"]:
@@ -66,7 +58,6 @@ async def add_book(book: Book):
     return book
 
 
-# Удаление книги по ID
 @app.delete("/books/{book_id}")
 async def delete_book(book_id: int):
     for book in data["books"]:
@@ -78,7 +69,6 @@ async def delete_book(book_id: int):
     raise HTTPException(status_code=404, detail="Книга не найдена")
 
 
-# Обновление книги по ID
 @app.put("/books/{book_id}", response_model=Book)
 async def update_book(book_id: int, updated_book: Book):
     for book in data["books"]:
